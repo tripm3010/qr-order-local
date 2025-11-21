@@ -46,7 +46,7 @@ services:
   # 3. Frontend
   frontend:
     # [THAY ĐỔI] Dùng Image từ Docker Hub
-    image: ${{ secrets.DOCKER_USERNAME }}/qr-order-frontend:latest
+    image: ${DOCKER_USERNAME}/qr-order-frontend:latest
     container_name: qr-order-frontend
     restart: always
     depends_on:
