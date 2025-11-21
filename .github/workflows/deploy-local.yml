@@ -1,0 +1,33 @@
+name: Local Deployment (VMware)
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy:
+    # Chạy trên máy ảo của bạn
+    runs-on: self-hosted
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Deploy with Docker Compose
+      run: |
+        # Di chuyển vào thư mục chứa code (do Runner tự tải về)
+        cd $GITHUB_WORKSPACE
+        
+        # Tạo thư mục uploads nếu chưa có
+        mkdir -p uploads
+        chmod 777 uploads
+
+        # Tắt container cũ
+        docker compose down
+
+        # Build và chạy container mới
+        # Dùng 'docker compose' (v2) thay vì 'docker-compose' (v1)
+        docker compose up -d --build
+        
+        # Xóa image rác để tiết kiệm ổ cứng máy ảo
+        docker image prune -f
