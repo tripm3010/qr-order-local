@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* --- STYLE CHO MÁY IN (THERMAL PRINTER) --- */
+@media print {
+    /* Ẩn tất cả mọi thứ mặc định */
+    body * {
+      visibility: hidden;
+    }
+  
+    /* Chỉ hiển thị vùng cần in */
+    #printable-area, #printable-area * {
+      visibility: visible;
+    }
+  
+    /* Định vị vùng in về góc trái trên cùng */
+    #printable-area {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%; /* Khổ giấy in nhiệt thường là 80mm hoặc 58mm */
+      margin: 0;
+      padding: 0;
+      color: black;
+      background: white;
+    }
+  
+    /* Reset các style không cần thiết khi in */
+    button, .no-print {
+      display: none !important;
+    }
+  }
+  
+  /* Style mô phỏng hóa đơn trên màn hình */
+  .receipt-font {
+    font-family: 'Courier New', Courier, monospace;
+  }

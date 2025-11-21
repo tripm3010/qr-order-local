@@ -1,0 +1,32 @@
+
+spring:
+  application:
+    name: qrorder
+  datasource:
+    url: jdbc:mysql://mysql-3d0cc741-tripm-e2ed.d.aivencloud.com:14278/qr_order_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: avnadmin
+    password: AVNS_EDxJ2iw0srM98mJWqnA
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate.format_sql: true
+      hibernate.jdbc.time_zone: UTC
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+    open-in-view: false
+  server:
+  port: 8080
+
+
+  logging:
+    level:
+      org.hibernate.SQL: warning
+
+app:
+  jwt:
+    secret: "RH8nuqnC8VuH2DbzQ!F&Z6DYsDNpaPXd"
+    expiration-ms: 86400000 # 24 gi?
+    valid-duration: 3600 # in seconds
+    refreshable-duration: 360000 #seconds
