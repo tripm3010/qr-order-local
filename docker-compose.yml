@@ -24,7 +24,7 @@ services:
   backend:
     # [THAY ĐỔI] Dùng Image từ Docker Hub (Thay 'username' bằng user docker hub của bạn)
     # Ví dụ: image: nguyenvanA/qr-order-backend:latest
-    image: ${DOCKER_USERNAME}/qr-order-backend:latest 
+    image: ${DOCKER_USERNAME:-local}/qr-order-backend:latest 
     # Lưu ý: Trên server EC2, bạn phải điền tên user thật, ví dụ: hieutran/qr-order-backend:latest
     # Vì file này trên server không hiểu biến ${{...}} của GitHub
     container_name: qr-order-backend
@@ -46,7 +46,7 @@ services:
   # 3. Frontend
   frontend:
     # [THAY ĐỔI] Dùng Image từ Docker Hub
-    image: ${DOCKER_USERNAME}/qr-order-frontend:latest
+    image: ${DOCKER_USERNAME:-local}/qr-order-frontend:latest
     container_name: qr-order-frontend
     restart: always
     depends_on:
