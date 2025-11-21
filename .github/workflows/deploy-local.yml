@@ -1,35 +1,39 @@
-name: Local Deployment (VMware)
+name: Local Deployment (Self-hosted)
 
 on:
   push:
     branches: [ "main" ]
 
 jobs:
-  deploy:
-    # Chạy trên máy ảo của bạn
+  deploy-local:
+    # Chạy trên máy ảo local của bạn (Self-hosted Runner)
     runs-on: self-hosted
-
+    
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Deploy with Docker Compose
+    - name: Build and Deploy
+      # [QUAN TRỌNG] Truyền Secret vào biến môi trường tại đây
+      # Docker Compose sẽ đọc biến này để thay thế cho ${DOCKER_USERNAME} trong file yml
       env:
-	DOCKER_USERNAME: ${{ secret.DOCKER_USERNAME }}
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       run: |
-        # Di chuyển vào thư mục chứa code (do Runner tự tải về)
+        # Di chuyển vào thư mục chứa code
         cd $GITHUB_WORKSPACE
         
-        # Tạo thư mục uploads nếu chưa có
+        # Tạo thư mục uploads nếu chưa có và cấp quyền
         mkdir -p uploads
         chmod 777 uploads
 
         # Tắt container cũ
+        # Truyền biến môi trường trực tiếp để đảm bảo nó tìm đúng tên image/container cũ
         DOCKER_USERNAME=$DOCKER_USERNAME docker compose down
 
         # Build và chạy container mới
-        # Dùng 'docker compose' (v2) thay vì 'docker-compose' (v1)
+        # Cờ --build để bắt buộc build lại image từ source code mới nhất
+        # Biến $DOCKER_USERNAME đã được set ở phần env: bên trên
         docker compose up -d --build
         
-        # Xóa image rác để tiết kiệm ổ cứng máy ảo
+        # Xóa các image rác (dangling images) để tiết kiệm dung lượng ổ cứng
         docker image prune -f
