@@ -1,0 +1,81 @@
+version: '3.8'
+
+services:
+  # 1. Database MySQL (Giữ nguyên)
+  mysql:
+    image: mysql:8.0
+    container_name: qr-order-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: qr_order_db
+      MYSQL_ROOT_HOST: '%'
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - qr-network
+
+  # 2. Backend
+  backend:
+    # [THAY ĐỔI] Dùng Image từ Docker Hub (Thay 'username' bằng user docker hub của bạn)
+    # Ví dụ: image: nguyenvanA/qr-order-backend:latest
+    image: ${{ secrets.DOCKER_USERNAME }}/qr-order-backend:latest 
+    # Lưu ý: Trên server EC2, bạn phải điền tên user thật, ví dụ: hieutran/qr-order-backend:latest
+    # Vì file này trên server không hiểu biến ${{...}} của GitHub
+    container_name: qr-order-backend
+    restart: always
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/qr_order_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: rootpassword
+      FILE_UPLOAD_DIR: /app/uploads
+      JAVA_TOOL_OPTIONS: "-Xmx350m -Xms350m -XX:+UseSerialGC"
+    volumes:
+      - ./uploads:/app/uploads
+    networks:
+      - qr-network
+
+  # 3. Frontend
+  frontend:
+    # [THAY ĐỔI] Dùng Image từ Docker Hub
+    image: ${{ secrets.DOCKER_USERNAME }}/qr-order-frontend:latest
+    container_name: qr-order-frontend
+    restart: always
+    depends_on:
+      - backend
+    expose:
+      - "80"
+    volumes:
+      - ./uploads:/usr/share/nginx/html/uploads
+    networks:
+      - qr-network
+
+  # 4. NPM (Giữ nguyên)
+  npm:
+    image: 'jc21/nginx-proxy-manager:latest'
+    container_name: qr-order-npm
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '81:81'
+      - '443:443'
+    volumes:
+      - ./npm-data:/data
+      - ./npm-letsencrypt:/etc/letsencrypt
+    networks:
+      - qr-network
+
+volumes:
+  mysql_data:
+
+networks:
+  qr-network:
+    driver: bridge
